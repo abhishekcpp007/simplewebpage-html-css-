@@ -1,23 +1,35 @@
-const express = require("express")
-const serverConfig= require('./configs/server.config')
-const mongoose=require('mongoose');
-const dbConfig = require("./configs/db.config");
+const express = require("express");
+const serverConfig = require("./configs/server.config");
+const mongoose = require("mongoose");
+const dbConfig = require('./configs/db.config');
+const userModel = require('./models/user.model');
+const app = express();
 
-const app= express();// starting the server
- 
-mongoose.connect( dbConfig.DB_URL);// FOR this we have mongodb up and running in my local machine
-  const db = mongoose.connection;
-  db.on("error",()=>{
-    console.log("Eroor while connection to DB");
+mongoose.connect(dbConfig.DB_URL);
+const db = mongoose.connection;
 
+db.on("error", () => {
+  console.log("Error while connecting to DB");
+});
+
+db.once("open", async () => {
+  console.log("Db is connected");
+  await init();
+});
+
+async function init() {
+  // Initialize the mongo db 
+  // need to create the ADMIN 
+  const admin = await userModel.create({
+    name: "Abhishek verma",
+    userId: "admin",
+    email: "abhishekverma800900@gmail.com",
+    userType: "ADMIN",
+    password: "welcome"
   });
-  db.once("open", ()=>{
-    console.log("Db is connected");
-  })
+  console.log(admin);
+}
 
-// logic to connect to MongoDB and create an ADMIN user
-
-
-app.listen(serverConfig.PORT, ()=>{ // application bind to port number 3333  ()- is the call back function
-    console.log(` Server started on the port number ${serverConfig.PORT}`);
-})
+app.listen(serverConfig.PORT, () => {
+  console.log(`Server started on the port number ${serverConfig.PORT}`);
+});
